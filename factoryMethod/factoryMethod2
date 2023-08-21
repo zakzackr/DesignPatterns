@@ -1,0 +1,398 @@
+import java.util.Random;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
+class RandomWrapper{
+    public static double getRanDouble(double min, double max){
+        Random r = new Random();
+        return min + r.nextDouble() * (max - min);
+    }
+
+    public static int getRanInteger(int min, int max){
+        Random r = new Random();
+        return min + r.nextInt(max);
+    }
+}
+
+class Name{
+    private String firstName;
+    private String lastName;
+
+    public Name(String firstName, String lastName){
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public String toString(){
+        return firstName + " " + lastName;
+    }
+}
+
+class BMI{
+    private double heightM;
+    private double weightKg;
+
+    public BMI(double heightM, double weightKg){
+        this.heightM = heightM;
+        this.weightKg = weightKg;
+    }
+
+    public double getBMI(){
+        return weightKg / (heightM * heightM);
+    }
+
+    public String toString(){
+        return "heightM: " + heightM + ", weightKg: " + weightKg + ", BMI: " + getBMI() + ".";
+    }
+}
+
+class Animal{
+    protected String species;
+    protected BMI bmi;
+    protected int age;
+    protected int hungerPercent = 100;
+    protected int lifeSpanDays;
+    protected Date spawnTime;
+    protected Date deathTime;
+
+    public Animal(String species, double heightM, double weightKg, int age, int lifeSpanDays){
+        this.species = species;
+        this.bmi = new BMI(heightM, weightKg);
+
+        this.age = age;
+        this.lifeSpanDays = lifeSpanDays;
+        this.spawnTime = new Date();
+    }
+
+    public void eat(){
+        if (isAlive()){
+            hungerPercent = 0;
+            System.out.println("The " + species + " just had a meal!! ");
+        }
+    }
+
+    public boolean isAlive(){
+        return deathTime == null;
+    }
+
+    public void setAsHungry(){
+        hungerPercent = 100;
+    }
+
+    public void die(){
+        hungerPercent = 0;
+        deathTime = new Date();
+        System.out.println("The " + species + " just passed away...");
+    }
+
+    public String dateCreated(){
+        return new SimpleDateFormat("yyyy/mm/dd hh:mm:ss").format(spawnTime);
+    }
+
+    public String toString(){
+        if (isAlive()){
+            return "The " + species + " is " + age + " yaer old (" + bmi + ") and expected to live for " + lifeSpanDays + "." ;
+        } else {
+            return "It passed away at " + new SimpleDateFormat("yyyy/mm/dd hh:mm:ss").format(deathTime);
+        }
+    }
+}
+
+class Mammal extends Animal{
+    protected double bodyTemperatureC;
+
+    public Mammal(String species, double heightM, double weightKg, int age, int lifeSpanDays, double bodyTemperatureC){
+        super(species, heightM, weightKg, age, lifeSpanDays);
+
+        this.bodyTemperatureC = bodyTemperatureC;
+    }
+
+    // public void eat(){
+    //     super.eat();
+    // }
+
+    public String toString(){
+        return super.toString() + " Its body temperature is/was " + bodyTemperatureC + ". ";
+    }
+}
+
+class Person extends Mammal{
+    public static final String SPECIES = "Human";
+    public static final double BODY_TEMPERATURE = 36.5;
+    public static final int LIFE_EXPECTANCY = 30000;
+    private Name name;
+
+    public Person(double heightM, double weightKg, int age, String firstName, String lastName){
+        super(SPECIES, heightM, weightKg, age, LIFE_EXPECTANCY, BODY_TEMPERATURE);
+
+        this.name = new Name(firstName, lastName);
+    }
+
+    public void eat(){
+        super.eat();
+        System.out.println(name + " is not hungy anymore...");
+    }
+
+    public String getName(){
+        return name.toString();
+    }
+
+    public String toString(){
+        return getName() + ": " + super.toString();
+    }
+}
+
+interface PlayfulPet{
+    abstract public String play();
+    abstract public String playWithPerson(Person person);
+    abstract public String playNoise();
+    abstract public String getPetName();
+    abstract public double getRentalCosts();
+    abstract public boolean likesActivity(String activity);
+    abstract public boolean dislikesActivity(String activity);
+    abstract public String doActivity(String activity);
+}
+
+class Cat extends Mammal implements PlayfulPet{
+    public static final String SPECIES = "Cat";
+    public static final int LIFE_EXPECTANCY = 5000;
+    public static final double BODY_TEMPERATURE = 38;
+
+    private static final double PLAYFUL_HOURLY_COSTS = 50;
+    private static final String[] LIKED_ACTIVITIES = {"eat","nap","groom","drink","crawl","explore","pet"};
+    private static final String[] DISLIKED_ACTIVITIES = {"bath"};
+
+    public Cat(double heightM, double weightKg, int age){
+        super(SPECIES, heightM, weightKg, age, LIFE_EXPECTANCY, BODY_TEMPERATURE);
+    }
+
+    // public void eat(){
+    //     super.eat();
+    //     System.out.println("The cat enjoyed eating!!");
+    // }
+
+    public String play(){
+        return "This cat starts playing with toys and rolling on the floor. ";
+    }
+
+    public String playWithPerson(Person person){
+        return "This cat plays with " + person.getName() + "!! ";
+    }
+
+    public String playNoise(){
+        return "Meow~~~";
+    }
+
+    public String getPetName(){
+        return species;
+    }
+
+    public double getRentalCosts(){
+        return this.PLAYFUL_HOURLY_COSTS;
+    }
+    
+    public boolean likesActivity(String activity){
+        return Arrays.asList(LIKED_ACTIVITIES).contains(activity);
+    }
+
+    public boolean dislikesActivity(String activity){
+        return Arrays.asList(DISLIKED_ACTIVITIES).contains(activity);
+    }
+
+    public String doActivity(String activity){
+        if (activity == "eat"){
+            eat();
+            return "This cat enjoys eating!! ";
+        } else if (likesActivity(activity)){
+            return "This cat loves this activity \"" + activity + "\"!! ";
+        } else if (dislikesActivity(activity)){
+            return "This cat is okay with this activity \"" + activity + "\"!! ";
+        } else {
+            return "This cat is indifferent about this activity \"" + activity + "\"... ";
+        }
+    }
+}
+
+class Dog extends Mammal implements PlayfulPet{
+    public static final String SPECIES = "Dog";
+    public static final int LIFE_EXPECTANCY = 6000;
+    public static final double BODY_TEMPERATURE = 38.5;
+
+    private static final double PLAYFUL_HOURLY_COSTS = 60;
+    private static final String[] LIKED_ACTIVITIES = {"eat","nap","drink","crawl","explore","pet"};
+    private static final String[] DISLIKED_ACTIVITIES = {"bath", "swim"};
+
+
+    Dog(double heightM, double weightKg, int age){
+        super(SPECIES, heightM, weightKg, age, LIFE_EXPECTANCY, BODY_TEMPERATURE);
+    }
+
+    public String play(){
+        return "This dog starts running until getting tired and eats food. ";
+    }
+
+    public String playWithPerson(Person person){
+        return "This dog is playing with " + person.getName() + ". ";
+    }
+
+    public String playNoise(){
+        return "Wan Wan!!";
+    }
+
+    public String getPetName(){
+        return species;
+    }
+
+    public double getRentalCosts(){
+        return this.PLAYFUL_HOURLY_COSTS;
+    }
+
+    public boolean likesActivity(String activity){
+        return Arrays.asList(LIKED_ACTIVITIES).contains(activity);
+    }
+
+    public boolean dislikesActivity(String activity){
+        return Arrays.asList(DISLIKED_ACTIVITIES).contains(activity);
+    }
+
+    public String doActivity(String activity){
+        return "This dog does this activity \"" + activity + "\".";
+    }
+}
+
+// cretor
+// PlayfulPetAssistant は、ペットを貸し出すロボットで、公園内で人間とペットを案内する
+abstract class PlayfulPetAssistant{
+    protected static final double DEFAULT_RENT_TIME = 1.0;
+    protected static final String DEFAULT_TOUR = "all-rounder pack";
+
+    protected Person currentPerson;
+    protected double currentRentTime = PlayfulPetAssistant.DEFAULT_RENT_TIME;
+    protected static String[] availableActivities = {"eat","walk","drink","nap","pet","run","explore"};
+    protected static String[] availableTours = {"all-rounder pack", "deluxe rounder pack"};
+
+
+    public String[] getActivities(){
+        return this.availableActivities;
+    }
+
+    public String[] getAvailableTours(){
+        return this.availableTours;
+    }
+
+    public void setPerson(Person person){
+        this.currentPerson = person;
+    }
+
+    public void setHours(double hours){
+        this.currentRentTime = hours;
+    }
+
+    public double getHours(){
+        return currentRentTime;
+    } 
+
+    public String getRandomActivity(){
+        List<String> activities = Arrays.asList(getActivities());
+        int ran = RandomWrapper.getRanInteger(0, activities.size());
+        return activities.get(ran);
+    }
+
+    public void reset(){
+        currentPerson = null;
+        currentRentTime = DEFAULT_RENT_TIME;
+    }
+
+    public boolean isValidTour(String tour){
+        return Arrays.asList(availableTours).contains(tour);
+    }
+
+    public double explainTour(Person person, String tour){
+        if (!isValidTour(tour)){
+            System.out.println("The " + tour + " you requested is unavailable... so you will enjoy the " + DEFAULT_TOUR + ". ");
+            tour = DEFAULT_TOUR;
+        }
+
+        setPerson(person);
+        PlayfulPet pet = createPlayfulPet();
+        double totalFee = pet.getRentalCosts() * getHours();
+
+        System.out.println(currentPerson.getName() + " rents a " + pet.getPetName() + " with " + tour + "!!");
+        
+        int activityCount = tour == DEFAULT_TOUR? 1: 3;
+        genericRounderTour(activityCount, currentPerson, pet);
+
+        System.out.println("== Payment " + totalFee + " to " + currentPerson.getName() +  " ==");
+        System.out.println("== Additional Information ==");
+        System.out.println(pet);
+
+        return totalFee;
+    }
+
+    public double explainTour(Person person){
+        return explainTour(person, DEFAULT_TOUR);
+    }
+
+    private void genericRounderTour(int activityCount, Person person, PlayfulPet pet){
+        String newLine = System.lineSeparator();
+        System.out.println(newLine + "You will meet your pet and walk around the park together!! After that, you will enjoy " + activityCount + " activity(s)!!");
+        for (int i = 0; i < activityCount; i++){
+            String randomActivity = getRandomActivity();
+            System.out.println((i + 1) + "st activity is " + randomActivity + "!!");
+            System.out.println(pet.doActivity(randomActivity));
+        }
+        System.out.println(newLine + "You will need to come to this entrance with the " + pet.getPetName() + " and make the payment. ");
+    }
+
+
+    // petを作成して返すFactory Method （具象クラスで実装）
+    // CatやDogなどのobjを作成するために、PlayfulPetAssistant を拡張した PlayfulCatAssistantやPlayfulDogAssistantなどの具象クラスを作成する
+    abstract public PlayfulPet createPlayfulPet();
+}
+
+class PlayfulCatAssistant extends PlayfulPetAssistant{
+    // Cat objを作成するFactory Methodの実装
+    public PlayfulPet createPlayfulPet(){
+        return new Cat(RandomWrapper.getRanDouble(0.15, 0.40), RandomWrapper.getRanDouble(5, 15), RandomWrapper.getRanInteger(1, 7));
+    }
+}
+
+class PlayfulDogAssistant extends PlayfulPetAssistant{
+    // Dog objを作成するFactory Methodの実装
+    public PlayfulPet createPlayfulPet(){
+        return new Dog(RandomWrapper.getRanDouble(0.15, 1.0), RandomWrapper.getRanDouble(5, 60), RandomWrapper.getRanInteger(1, 10));
+    }
+}
+
+class FairyWorld{
+    public void rentPet(PlayfulPetAssistant assistant, Person person){
+        System.out.println("Thanks for your rental!!");
+        assistant.explainTour(person);
+        System.out.println();
+    }
+
+    public void rentPet(PlayfulPetAssistant assistant, Person person, String tour){
+        System.out.println("Thanks for your rental!!");
+        assistant.explainTour(person, tour);
+        System.out.println();
+    }
+}
+
+class Main{
+    public static void main(String[] args){
+        Person amy = new Person(1.61, 43, 21, "Amy", "Thomas");
+        Person joao = new Person(1.78, 70, 28, "Joao", "Ronaldo");
+
+        FairyWorld fairyWorld = new FairyWorld();
+        fairyWorld.rentPet(new PlayfulCatAssistant(), amy);
+        fairyWorld.rentPet(new PlayfulDogAssistant(), amy, "relax-plan");
+        fairyWorld.rentPet(new PlayfulDogAssistant(), joao);
+        fairyWorld.rentPet(new PlayfulDogAssistant(), joao, "deluxe rounder pack");
+    }
+}
+
+
+
+
